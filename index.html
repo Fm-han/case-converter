@@ -3,137 +3,119 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>大小写转换工具 - 在线中英文大小写转换</title>
-  <meta name="description" content="免费在线大小写转换工具，支持英文句子大小写转换、中文拼音首字母大写，浏览器本地处理。">
+  <title>大小写转换工具 - 文本首字母大写/驼峰/下划线转换</title>
+  <meta name="description" content="免费在线大小写转换工具，支持首字母大写、全大写、全小写、驼峰命名、下划线命名转换，浏览器本地处理。">
   <meta name="robots" content="index, follow">
   <link rel="canonical" href="https://fm-han.github.io/case-converter/">
-  <script src="https://cdn.tailwindcss.com"></script>
   <style>
-    body { background: #0a0a1a; color: #e2e8f0; font-family: system-ui, sans-serif; min-height: 100vh; }
-    .glass { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(20px); border-radius: 16px; }
-    .btn-primary { background: linear-gradient(135deg, #6366f1, #8b5cf6); transition: all 0.3s; }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(99,102,241,0.4); }
-    .btn-outline { border: 1px solid rgba(99,102,241,0.4); transition: all 0.3s; }
-    .btn-outline:hover { background: rgba(99,102,241,0.1); }
-    textarea { background: rgba(0,0,0,0.3); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; color: #e2e8f0; resize: vertical; }
-    textarea:focus { outline: none; border-color: #6366f1; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; color: #333; line-height: 1.6; background: #fafafa; }
+    h1 { text-align: center; font-size: 1.8rem; color: #1a1a1a; }
+    h1 small { display: block; font-size: 0.85rem; color: #666; margin-top: 4px; font-weight: normal; }
+    .section { margin: 20px 0; padding: 16px; border: 1px solid #e0e0e0; border-radius: 8px; background: #fff; }
+    .section label { display: block; font-weight: 600; margin-bottom: 8px; }
+    textarea { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 1rem; box-sizing: border-box; font-family: monospace; resize: vertical; min-height: 100px; }
+    .buttons { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+    button { padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; font-size: 0.9rem; }
+    .btn-action { background: #007bff; color: #fff; }
+    .btn-copy { background: #28a745; color: #fff; }
+    .btn-clear { background: #6c757d; color: #fff; }
+    button:hover { opacity: 0.9; }
+    .result-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 12px; margin-top: 12px; }
+    .result-item { padding: 12px; background: #f8f9fa; border-radius: 6px; }
+    .result-item .label { font-size: 0.85rem; color: #666; margin-bottom: 6px; }
+    .result-item .value { font-family: monospace; word-break: break-all; font-size: 0.95rem; }
+    .footer { text-align: center; margin: 24px 0; padding: 12px; font-size: 0.85rem; color: #28a745; font-weight: 500; }
   </style>
 </head>
-<body class="flex flex-col items-center justify-start p-6">
+<body>
 
-  <header class="text-center mb-8">
-    <h1 class="text-3xl font-bold bg-gradient-to-r from-indigo-400 to-purple-400 bg-clip-text text-transparent">大小写转换工具</h1>
-    <p class="text-gray-400 mt-2 text-sm">英文大小写 / 中文拼音首字母大写</p>
-  </header>
+  <h1>大小写转换工具 <small>首字母大写 / 驼峰 / 下划线 · 浏览器本地处理</small></h1>
 
-  <main class="w-full max-w-2xl flex flex-col gap-4">
-
-    <!-- 转换按钮 -->
-    <div class="flex gap-2 flex-wrap">
-      <button onclick="transform('uppercase')" class="btn-outline px-4 py-2 rounded-lg text-sm text-gray-300">全部大写 UPPER</button>
-      <button onclick="transform('lowercase')" class="btn-outline px-4 py-2 rounded-lg text-sm text-gray-300">全部小写 lower</button>
-      <button onclick="transform('title')" class="btn-outline px-4 py-2 rounded-lg text-sm text-gray-300">首字母大写 Title</button>
-      <button onclick="transform('sentence')" class="btn-outline px-4 py-2 rounded-lg text-sm text-gray-300">句首大写 Sentence.</button>
-      <button onclick="transform('toggle')" class="btn-outline px-4 py-2 rounded-lg text-sm text-gray-300">大小写互换 tOGGLE</button>
-      <button onclick="transform('pinyin')" class="btn-outline px-4 py-2 rounded-lg text-sm text-gray-300">拼音首字母</button>
+  <div class="section">
+    <label>输入文本</label>
+    <textarea id="input" placeholder="输入需要转换的文本..."></textarea>
+    <div class="buttons">
+      <button class="btn-action" onclick="convert()">转换</button>
+      <button class="btn-copy" onclick="copyAll()">复制全部</button>
+      <button class="btn-clear" onclick="clearAll()">清空</button>
     </div>
+  </div>
 
-    <!-- 输入 -->
-    <div class="glass p-4">
-      <label class="text-xs text-gray-500 block mb-2">输入</label>
-      <textarea id="input" rows="6" class="w-full p-3" placeholder="输入英文或中文文本..."></textarea>
-    </div>
-
-    <!-- 操作 -->
-    <div class="flex gap-3">
-      <button onclick="applyTransform()" class="btn-primary flex-1 py-3 rounded-xl font-medium text-white">转换</button>
-      <button onclick="swap()" class="btn-outline px-4 py-3 rounded-xl text-gray-400">交换 ↑↓</button>
-      <button onclick="clearAll()" class="btn-outline px-4 py-3 rounded-xl text-gray-500 text-sm">清空</button>
-    </div>
-
-    <!-- 输出 -->
-    <div class="glass p-4">
-      <div class="flex justify-between items-center mb-2">
-        <label class="text-xs text-gray-500">输出</label>
-        <button onclick="copy()" class="text-xs text-indigo-400 hover:text-indigo-300">复制</button>
+  <div class="section">
+    <label>转换结果</label>
+    <div class="result-grid">
+      <div class="result-item">
+        <div class="label">首字母大写 (Title Case)</div>
+        <div class="value" id="result1">-</div>
       </div>
-      <textarea id="output" rows="6" class="w-full p-3" readonly placeholder="结果将在此显示..."></textarea>
-    </div>
-
-    <!-- 示例 -->
-    <div class="glass p-4 text-xs text-gray-500">
-      <p class="mb-2 text-gray-400">示例文本：</p>
-      <div class="flex gap-2 flex-wrap">
-        <button onclick="setSample('hello world')" class="btn-outline px-3 py-1 rounded text-gray-400">hello world</button>
-        <button onclick="setSample('THE QUICK BROWN FOX')" class="btn-outline px-3 py-1 rounded text-gray-400">THE QUICK BROWN FOX</button>
-        <button onclick="setSample('你好世界')" class="btn-outline px-3 py-1 rounded text-gray-400">你好世界</button>
+      <div class="result-item">
+        <div class="label">全大写 (UPPERCASE)</div>
+        <div class="value" id="result2">-</div>
+      </div>
+      <div class="result-item">
+        <div class="label">全小写 (lowercase)</div>
+        <div class="value" id="result3">-</div>
+      </div>
+      <div class="result-item">
+        <div class="label">驼峰命名 (camelCase)</div>
+        <div class="value" id="result4">-</div>
+      </div>
+      <div class="result-item">
+        <div class="label">帕斯卡命名 (PascalCase)</div>
+        <div class="value" id="result5">-</div>
+      </div>
+      <div class="result-item">
+        <div class="label">下划线命名 (snake_case)</div>
+        <div class="value" id="result6">-</div>
       </div>
     </div>
+  </div>
 
-  </main>
+  <div class="footer">100% 免费 · 数据不上传服务器 · 仅浏览器本地处理</div>
 
   <script>
-    let currentTransform = 'uppercase';
+    function convert() {
+      const text = document.getElementById('input').value.trim();
+      if (!text) return;
 
-    function transform(t) {
-      currentTransform = t;
-      applyTransform();
+      // Title Case
+      document.getElementById('result1').textContent = text.replace(/\w\S*/g, t => t.charAt(0).toUpperCase() + t.substr(1).toLowerCase());
+      
+      // UPPERCASE
+      document.getElementById('result2').textContent = text.toUpperCase();
+      
+      // lowercase
+      document.getElementById('result3').textContent = text.toLowerCase();
+      
+      // camelCase
+      const words = text.split(/[\s_-]+/);
+      let camel = words[0].toLowerCase();
+      for (let i = 1; i < words.length; i++) camel += words[i].charAt(0).toUpperCase() + words[i].slice(1).toLowerCase();
+      document.getElementById('result4').textContent = camel;
+      
+      // PascalCase
+      const pascalWords = text.split(/[\s_-]+/);
+      document.getElementById('result5').textContent = pascalWords.map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join('');
+      
+      // snake_case
+      document.getElementById('result6').textContent = text.split(/[\s-]+/).map(w => w.toLowerCase()).join('_');
     }
 
-    function applyTransform() {
-      const input = document.getElementById('input').value;
-      if (!input) return;
-      let out = '';
-      switch (currentTransform) {
-        case 'uppercase': out = input.toUpperCase(); break;
-        case 'lowercase': out = input.toLowerCase(); break;
-        case 'title': out = input.replace(/\b[a-z]/g, c => c.toUpperCase()); break;
-        case 'sentence': out = input.toLowerCase().replace(/(^\s*|[.!?]\s+)([a-z])/g, (m, p1, p2) => p1 + p2.toUpperCase()); break;
-        case 'toggle': out = input.split('').map(c => c === c.toUpperCase() && c !== c.toLowerCase() ? c.toLowerCase() : c.toUpperCase()).join(''); break;
-        case 'pinyin': out = pinyinInitials(input); break;
-      }
-      document.getElementById('output').value = out;
-    }
-
-    function pinyinInitials(str) {
-      // 常见汉字拼音首字母对照（部分）
-      const map = '阿啊锕嗄腌吖八巴巴岜灞白伯佰柏半办帮邦浜薄霸巴钵笆蛹苝萆宝保报饱堡鲍曝北海奔本笨贝卜补不布步部埠才采彩菜蔡参骖餐残灿仓沧操曹册策层曾查茶搽槎察岔差拆柴钗搀谗馋缠蝉产铲阐颤昌长肠常场厂唱超车彻臣辰晨衬称城成呈承吃赤斥冲冲虫崇抽仇绸畴稠愁筹初出除锄楚础储触揣穿传船喘串窗床闯创吹炊垂春椿纯唇戳辞词此刺次从丛凑粗促醋窜催脆翠村存寸挫措搭答达打大带代待单胆蛋当刀导倒到盗道得德的灯等低底滴敌笛狄涤嫡底店电殿店叼调掉爹碟蝶丁叮顶定丢东动冻洞都斗独读渡肚端短段断对堆队吨顿多夺朵掇情蛾俄额鹅蛾饿恶二恩儿而尔洱饵二发法番翻凡烦反返范贩饭方防坊芳芳放飞非肥废沸肺费分纷芬粉份粪奋风封蜂锋佛夫肤孵扶福服抚府腐父负复副傅富赋缚覆嘎噶尬该改钙盖概干杆甘赶感刚岗港高搞稿告哥歌搁格蛤阁革隔个给根跟更埂耿梗工功攻公宫恭龚供构购够姑孤古谷股骨鼓固故顾瓜刮挂乖怪关观官管馆惯广贵桂跪辊滚棍锅国果过哈骸孩海氦害寒喊汉号浩喝合何和河荷盒鹤贺黑很狠恨哼恒横衡红宏洪喉厚后乎呼忽胡湖糊虎护沪花华化划画话桦怀淮坏欢环缓换黄慌晃灰挥恢辉毁徽回汇会绘惠慧活火或货获击饥机肌迹积基姬绩稽击及级极吉棘集急嫉挤脊己纪济计记季寂技忌祭寄加夹佳枷家和嘉贾甲钾假嫁价驾架奸尖坚歼间肩艰兼监笺溅箭贱见舰剑键健渐溅鉴别将浆僵疆讲奖蒋匠降酱娇浇胶焦礁脚搅叫轿较揭街节劫捷截竭洁解姐届金今仅紧锦尽劲晋禁近烬浸尽京经惊晶精鲸景警净径竟竞敬静镜纠玖究九酒旧救就舅居局橘举巨句聚距卷倦绢觉决绝爵蕨掘嚼军君均菌俊郡峻骏咖卡开揩凯刊堪砍看康慷糠扛靠考烤拷贝可行棱冷厘梨黎篱狸离李里理鲤莉力历厉立粒沥隶连帘莲廉炼恋链良凉量粮两亮凉辽疗聊僚了料列劣猎林临邻凛吝淋玲菱龄零领岭令溜刘流留硫瘤柳六龙笼隆聋隆搂篓搂芦芦陆录鹿禄旅屡缕履律率氯滤绿峦卵乱略掠轮伦论罗洛络骆妈麻马玛码蚂骂吗埋买卖麦迈满慢漫忙芒茫盲茫毛矛铆茂冒贸帽么没煤梅媒镁每美门闷们萌蒙锰梦弥迷谜米泌秘密蜜面苗描秒藐民抿闽皿敏名明鸣命谬摸摹磨魔抹末莫墨默木沐慕墓幕木那纳拿娜钠纳呢能你泥拟腻年娘酿尿捏聂啮您宁凝牛扭钮农浓弄奴努怒女暖疟虐挪懦糯欧鸥偶呕偶怕拍排派潘盘盼庞抛创袍跑陪配盆朋彭蓬棚硼膨匹匹否劈批皮疲脾匹匹片偏篇飘票撇拼贫频品聘平评凭坡泼颇破迫魄铺葡扑仆莆脯葡七期欺妻戚凄漆齐其奇歧祈骑起弃气泣契砌器恰洽牵铅谦前钱潜浅遣强墙蔷抢强壳敲悄桥瞧巧俏鞘切茄且窃侵秦寝轻氢倾清晴情请庆穷琼秋求球囚酋曲驱屈渠取去趣圈颧权全泉拳犬券劝缺炔瘸却鹊裙群然燃冉染瓤嚷让饶扰绕惹热壬仁人忍认任日绒荣容溶熔融柔揉蹂肉如儒蠕汝乳辱入软锐瑞润若弱洒撒萨腮鳃塞赛三散嗓丧扫嫂色涩瑟森僧沙纱砂傻啥帅衰摔甩栓双霜水税睡顺舜说朔硕斯撕私思司丝死四寺似饲松耸宋送颂搜俗素速粟诉肃酸蒜算虽绥随髓碎岁遂隧孙损笋所索她他它台太态泰贪摊滩坛谈坦叹炭探汤唐堂糖膛趟烫逃桃陶淘讨套特疼腾藤疼梯踢提题体屉天添田甜舔条跳贴铁厅听烃停庭挺艇通同桐铜童统痛偷投头透凸突图徒涂土团推腿褪托拖脱驼妥挖瓦丸完玩顽挽晚碗万汪亡王网往望忘威微危为围维伪尾委未味畏温文纹闻稳问翁蜗涡我卧握沃无吴五午伍武舞务物误恶悟雾西希析息惜稀溪熄嘻膝昔锡晰熙熄习席袭媳洗喜戏系细隙下吓夏先仙鲜弦咸贤衔显险县现线限宪陷馅羡相香箱湘乡想响享项象像橡向凶熊休修羞血嘘须虚需徐许序叙血续婿轩喧悬旋选绚靴学雪血巡寻训迅讯压呀牙芽鸭崖哑雅亚讶咽烟淹延严研岩炎沿盐演衍掩眼演厌艳焰雁燕扬羊阳杨佯洋仰养氧样邀腰尧姚窑谣摇遥咬药耀野业叶页液医依伊咿衣壹仪夷怡宜姨移动遗以已蚁倚椅义亿忆艺议易异译翼翌因音殷吟银尹引饮隐印应英樱鹰迎盈影映硬哟佣涌永泳勇用幽优悠尤由犹油游友有又右幼俞渝渔予屿羽雨玉吁郁育狱预域欲御裕遇寓豫愈渊元员园原圆援缘源远院愿曰约越跃岳钥月悦阅云匀允孕运晕韵蕴扎咱杂砸灾栽宰载再在咱攒暂赞赃脏葬遭糟早枣藻皂灶造噪燥则泽责择贼增憎扎渣轧闸眨乍诈炸榨宅债寨沾毡粘站占战栈张掌涨杖丈帐账障招昭找沼照罩爪赵照遮折哲者这浙贞针侦珍真枕诊震振镇阵蒸征挣睁蒸正证郑政之芝支枝知织脂汁只指止至志治中忠终钟肿种重众州周洲粥轴肘帚咒宙昼骤猪诸珠株蛛朱烛主柱住注驻祝著筑抓爪专砖转赚撰庄妆装壮状椎锥坠缀追准捉卓桌琢啄着孜资滋子紫仔字自渍宗综棕踪总纵邹走揍租足族阻组祖组钻嘴最罪醉尊遵左作坐座做坐座'.split('');
-      let result = '';
-      for (let char of str) {
-        if (/[a-zA-Z]/.test(char)) {
-          result += char.toUpperCase();
-        } else if (/[\u4e00-\u9fa5]/.test(char)) {
-          // 找对应汉字的首字母
-          const idx = char.codePointAt(0) - 0x4E00;
-          if (idx >= 0 && idx < map.length) result += map[idx].toUpperCase();
-          else result += char;
-        } else {
-          result += char;
-        }
-      }
-      return result;
-    }
-
-    function swap() {
-      [document.getElementById('input').value, document.getElementById('output').value] =
-      [document.getElementById('output').value, document.getElementById('input').value];
-    }
-
-    function setSample(s) { document.getElementById('input').value = s; applyTransform(); }
-
-    function copy() {
-      const v = document.getElementById('output').value;
-      if (!v) return;
-      navigator.clipboard.writeText(v).then(() => {
-        const btn = document.querySelector('[onclick="copy()"]');
-        btn.textContent = '已复制!';
-        setTimeout(() => btn.textContent = '复制', 1500);
-      });
+    function copyAll() {
+      const results = [
+        '首字母大写: ' + document.getElementById('result1').textContent,
+        '全大写: ' + document.getElementById('result2').textContent,
+        '全小写: ' + document.getElementById('result3').textContent,
+        '驼峰: ' + document.getElementById('result4').textContent,
+        '帕斯卡: ' + document.getElementById('result5').textContent,
+        '下划线: ' + document.getElementById('result6').textContent
+      ].join('\n');
+      navigator.clipboard.writeText(results).then(() => alert('已复制!'));
     }
 
     function clearAll() {
       document.getElementById('input').value = '';
-      document.getElementById('output').value = '';
+      document.querySelectorAll('.result-item .value').forEach(el => el.textContent = '-');
     }
   </script>
 </body>
